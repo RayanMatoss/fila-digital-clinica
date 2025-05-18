@@ -15,7 +15,7 @@ const DisplayPage: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState<any>(null);
   
-  // Update the time every second
+  // Atualiza o horário a cada segundo
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
