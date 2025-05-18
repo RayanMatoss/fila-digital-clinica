@@ -62,7 +62,11 @@ const sampleVideos: Video[] = [
 
 export const TicketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [rooms, setRooms] = useState<Room[]>(sampleRooms);
+  const [rooms, setRooms] = useState<Room[]>(sampleRooms.map(room => ({
+    ...room,
+    lastTicketNumber: 0,
+    lastTicketDate: new Date().toLocaleDateString()
+  })));
   const [videos, setVideos] = useState<Video[]>(sampleVideos);
 
   // Load data from localStorage on component mount
@@ -104,9 +108,30 @@ export const TicketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     requestAnimationFrame(saveData);
   }, [tickets, rooms, videos]);
 
-  const generateTicketNumber = (prefix: string) => {
-    const randomNum = Math.floor(100 + Math.random() * 900); // Generate number between 100-999
-    return `${prefix}${randomNum}`;
+  const generateTicketNumber = (prefix: string, roomId: string) => {
+    const today = new Date().toLocaleDateString();
+    const room = rooms.find(r => r.id === roomId);
+    
+    if (!room) throw new Error("Room not found");
+
+    // Se for um novo dia ou não houver número anterior, começa do 1
+    if (room.lastTicketDate !== today) {
+      room.lastTicketNumber = 0;
+      room.lastTicketDate = today;
+    }
+
+    // Incrementa o número da senha
+    room.lastTicketNumber = (room.lastTicketNumber || 0) + 1;
+    
+    // Formata o número com zeros à esquerda (ex: 01, 02, etc)
+    const formattedNumber = room.lastTicketNumber.toString().padStart(2, '0');
+    
+    // Atualiza o estado das salas
+    setRooms(prev => prev.map(r => 
+      r.id === roomId ? { ...r, lastTicketNumber: room.lastTicketNumber, lastTicketDate: today } : r
+    ));
+
+    return `${prefix}${formattedNumber}`;
   };
 
   const addTicket = (roomId: string): Ticket => {
@@ -115,7 +140,7 @@ export const TicketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     
     const newTicket: Ticket = {
       id: Date.now().toString(),
-      number: generateTicketNumber(room.prefix),
+      number: generateTicketNumber(room.prefix, roomId),
       roomId,
       status: 'waiting',
       createdAt: new Date(),

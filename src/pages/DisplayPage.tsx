@@ -4,6 +4,7 @@ import VideoPlayer from '@/components/VideoPlayer';
 import { TicketProvider } from '@/context/TicketContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { GooeyText } from '@/components/ui/gooey-text-morphing';
 
 const WEATHER_API_KEY = 'SUA_API_KEY_AQUI'; // Substitua pela sua chave da OpenWeatherMap
 const WEATHER_CITY = 'Salvador';
@@ -14,6 +15,7 @@ const DisplayPage: React.FC = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState<any>(null);
+  const [localName, setLocalName] = useState('');
   
   // Atualiza o horário a cada segundo
   useEffect(() => {
@@ -29,6 +31,8 @@ const DisplayPage: React.FC = () => {
     fetch(`https://api.openweathermap.org/data/2.5/weather?q=${WEATHER_CITY}&appid=${WEATHER_API_KEY}&units=${WEATHER_UNITS}&lang=${WEATHER_LANG}`)
       .then(res => res.json())
       .then(data => setWeather(data));
+    const savedLocal = localStorage.getItem('localName') || '';
+    setLocalName(savedLocal);
   }, []);
   
   const formattedTime = currentTime.toLocaleTimeString('pt-BR', {
@@ -45,64 +49,56 @@ const DisplayPage: React.FC = () => {
 
   return (
     <TicketProvider>
-      <div className="min-h-screen flex flex-col bg-clinic-grey">
+      <div className="min-h-screen flex flex-col bg-primary-light">
         {/* Header bar */}
-        <header className="bg-clinic-blue text-white p-4 flex justify-between items-center z-20">
-          <div className="text-xl font-semibold">Sistema de Chamada</div>
-          <div className="flex flex-col items-end gap-2 min-w-[260px]">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-white bg-opacity-20 rounded px-3 py-1 min-w-[120px] min-h-[56px]">
-                {weather && weather.main ? (
-                  <>
-                    {weather.weather && weather.weather[0] && (
-                      <img
-                        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-                        alt={weather.weather[0].description}
-                        className="w-10 h-10"
-                      />
-                    )}
-                    <div className="flex flex-col text-right">
-                      <span className="text-lg font-bold">{Math.round(weather.main.temp)}°C</span>
-                      <span className="text-xs capitalize">{weather.weather[0].description}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col text-right w-full animate-pulse">
-                    <span className="text-lg font-bold text-gray-200">--°C</span>
-                    <span className="text-xs text-gray-200">Carregando clima...</span>
-                  </div>
-                )}
-              </div>
-              <div className="text-5xl font-bold leading-tight">{formattedTime}</div>
-            </div>
-            <div className="text-2xl capitalize font-medium">{formattedDate}</div>
+        <header className="bg-primary-dark text-primary-light p-2 flex items-center border-b border-primary-dark">
+          <div className="flex-1 flex items-center gap-4">
+            <span className="text-3xl font-extrabold whitespace-nowrap text-primary-light">
+              Sistema de chamadas
+            </span>
+          </div>
+          <div className="flex flex-row items-center gap-6 min-w-[400px] justify-end">
+            {weather && weather.main ? (
+              <span className="text-base font-medium whitespace-nowrap">
+                {Math.round(weather.main.temp)}°C, {weather.weather[0].description.charAt(0).toUpperCase() + weather.weather[0].description.slice(1)}
+              </span>
+            ) : (
+              <span className="text-base font-medium whitespace-nowrap">--°C, --</span>
+            )}
+            <span className="text-3xl font-bold">{formattedTime}</span>
+            <span className="text-xs text-right leading-tight">
+              {localName && <>{localName}<br/></>}{formattedDate}
+            </span>
           </div>
         </header>
         
         {/* Main content area with two columns */}
         <div className="flex flex-1">
           {/* Left column - Video player (larger) */}
-          <div className="flex-grow w-3/4 relative">
-            <VideoPlayer />
+          <div className="flex-grow w-3/4 relative flex items-center justify-center p-0">
+            <div className="w-full h-full border border-primary-dark/30 bg-white flex items-center justify-center" style={{borderWidth: '1px'}}>
+              <VideoPlayer />
+            </div>
           </div>
           
           {/* Right column - Ticket display (sidebar) */}
-          <div className="w-1/4 min-w-[300px] border-l border-gray-300 bg-white bg-opacity-90 overflow-auto p-4">
+          <div className="w-[260px] min-w-[200px] border-l border-primary-dark flex flex-col justify-stretch p-0">
             <TicketDisplay />
           </div>
         </div>
         
         {/* Footer bar */}
-        <footer className="bg-white border-t p-4 flex justify-between items-center z-20">
+        <footer className="bg-primary-medium border-t border-primary-dark p-2 flex justify-between items-center z-20">
           <Button 
             variant="outline" 
             size="sm"
+            className="border-primary-dark text-primary-dark hover:bg-primary-dark hover:text-primary-light"
             onClick={() => navigate('/')}
           >
             Voltar
           </Button>
           
-          <div className="text-gray-500 text-sm">
+          <div className="text-primary-dark text-sm">
             Sistema de Gerenciamento de Filas
           </div>
         </footer>

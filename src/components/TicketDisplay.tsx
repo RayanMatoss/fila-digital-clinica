@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTickets } from '../context/TicketContext';
 import { cn } from '@/lib/utils';
@@ -44,54 +43,26 @@ const TicketDisplay: React.FC<TicketDisplayProps> = ({ roomId }) => {
   }, [displayRooms.map(room => room.currentTicket).join(',')]);
 
   return (
-    <div className="flex flex-col space-y-4 w-full">
-      <h2 className="text-xl font-bold text-center text-clinic-blue mb-2">Senhas</h2>
-      
+    <div className="flex flex-col w-full">
+      {/* <h2 className="text-xl font-bold text-center text-clinic-blue mb-0">Senhas</h2> */}
       {displayRooms.map(room => (
         <Card key={room.id} className={cn(
-          "overflow-hidden transition-all duration-500",
+          "overflow-hidden transition-all duration-500 w-full bg-white border border-gray-300 rounded-lg my-2 p-0 flex flex-col items-center justify-center",
           animatingTickets[room.id] ? "ring-2 ring-clinic-blue" : ""
         )}>
-          <CardHeader className="bg-clinic-blue text-white p-2 text-center">
-            <h3 className="font-semibold text-sm">{room.name}</h3>
-          </CardHeader>
-          
-          <CardContent className="p-3">
-            {/* Current ticket display */}
-            {room.currentTicket ? (
-              <div className="flex flex-col items-center justify-center">
-                <div className="text-gray-600 text-sm font-medium">SENHA ATUAL</div>
-                <div className={cn(
-                  "text-clinic-blue font-bold transition-all duration-1000",
-                  animatingTickets[room.id] 
-                    ? "text-5xl animate-pulse-scale" 
-                    : "text-4xl"
-                )}>
-                  {room.currentTicket}
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-16 text-gray-400 text-sm">
-                Aguardando chamada...
-              </div>
-            )}
-            
-            {/* Ticket history */}
-            {room.ticketHistory.length > 0 && (
-              <div className="mt-2">
-                <div className="text-gray-500 text-xs mb-1">ÚLTIMAS CHAMADAS</div>
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {room.ticketHistory.map((ticketNumber, index) => (
-                    <div 
-                      key={`${room.id}-${ticketNumber}-${index}`}
-                      className="px-2 py-1 rounded-md text-sm font-medium bg-gray-100 text-gray-600"
-                    >
-                      {ticketNumber}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <CardContent className="flex flex-col items-center justify-center p-3">
+            {/* Tipo de atendimento */}
+            <div className="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-widest">
+              {room.name}
+            </div>
+            {/* Senha */}
+            <div className="text-4xl font-extrabold text-orange-600 mb-1" style={{letterSpacing: '2px'}}>
+              {room.currentTicket || '---'}
+            </div>
+            {/* Nome da sala */}
+            <div className="text-base font-bold text-gray-700 mt-1 uppercase tracking-wide">
+              {room.name}
+            </div>
           </CardContent>
         </Card>
       ))}
